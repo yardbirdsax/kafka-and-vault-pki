@@ -1,7 +1,7 @@
 {
   "ttl":"8760h",
   "allows_domains":[
-    "kafka.local"
+    "broker.kafka.local"
   ],
   "allow_subdomains": true
 }

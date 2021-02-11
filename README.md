@@ -82,8 +82,31 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
   curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/set-url.json http://localhost:8200/v1/pki/kafka/config/urls
   ```
+- Enable AppRole authentication.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/enable-approle.json http://localhost:8200/v1/sys/auth/approle
+  ```
+## Configure for Kafka Brokers
 - Create a role for issuing certificates.
   ```
-  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-role.json http://localhost:8200/v1/pki/kafka/roles/kafka
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-role.json http://localhost:8200/v1/pki/kafka/roles/kafka-broker
   ```
-
+- Create a policy for Kafka servers.
+  ```
+  docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault policy write kafka-broker /repo/policies/kafka-broker.hcl
+  ```
+- Create an AppRole for Kafka servers.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-kafka-broker-approle.json http://localhost:8200/v1/auth/approle/role/kafka-broker -v
+  ```
+- Fetch a RoleID and SecretID for the AppRole.
+  ```
+  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read auth/approle/role/kafka-broker/role-id
+  Key        Value
+  ---        -----
+  role_id    7b69c952-f05c-6d5a-a5b7-c5130163ca61
+  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault write -f auth/approle/role/kafka-broker/secret-id
+  Key                   Value
+  ---                   -----
+  secret_id             766db74c-6a86-7937-1b18-cd2a09ca29dd
+  secret_id_accessor    973c078c-d552-ec72-6532-9625bfdf846f
