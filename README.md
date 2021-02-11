@@ -73,6 +73,10 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   * Connection #0 to host localhost left intact
   * Closing connection 0
   ```
+- Adjust the max TTL length to 10 years
+  ```
+  docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault secrets tune -max-lease-ttl=87600h pki/kafka
+  ```
 - Create a root CA certificate
   ```
   curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/generate-root.json http://localhost:8200/v1/pki/kafka/root/generate/internal -v
@@ -86,7 +90,9 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
   curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/enable-approle.json http://localhost:8200/v1/sys/auth/approle
   ```
+
 ## Configure for Kafka Brokers
+
 - Create a role for issuing certificates.
   ```
   curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-role.json http://localhost:8200/v1/pki/kafka/roles/kafka-broker
