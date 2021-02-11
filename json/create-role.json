@@ -1,0 +1,7 @@
+{
+  "ttl":"8760h",
+  "allows_domains":[
+    "kafka.local"
+  ],
+  "allow_subdomains": true
+}

@@ -52,7 +52,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Enable the PKI back end.
   ```
-  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPUT -d@json/enable-pki.json http://localhost:8200/v1/sys/mounts/pki -v
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPUT -d@json/enable-pki.json http://localhost:8200/v1/sys/mounts/pki/kafka -v
   *   Trying 127.0.0.1...
   * TCP_NODELAY set
   * Connected to localhost (127.0.0.1) port 8200 (#0)
@@ -73,3 +73,17 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   * Connection #0 to host localhost left intact
   * Closing connection 0
   ```
+- Create a root CA certificate
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/generate-root.json http://localhost:8200/v1/pki/kafka/root/generate/internal -v
+  ```
+  You can ignore the output of this command.
+- Set the issuing URL.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/set-url.json http://localhost:8200/v1/pki/kafka/config/urls
+  ```
+- Create a role for issuing certificates.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-role.json http://localhost:8200/v1/pki/kafka/roles/kafka
+  ```
+
