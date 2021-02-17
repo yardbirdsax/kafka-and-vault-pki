@@ -10,7 +10,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
 
 ## Goals and Requirements
 
-- [ ] The Kafka start-up process must include authenticating against Vault, retrieving certificates, and then starting the Kafka broker with those certificates bound.
+- [X] The Kafka start-up process must include authenticating against Vault, retrieving certificates, and then starting the Kafka broker with those certificates bound.
 - [ ] Kafka consumers and producers must follow a similar pattern, where certificates are retrieved every time they start up.
 - [ ] Different consumers and producers must be able to obtain certificates from Vault that only allow them access to resources they are authorized for (i.e. different certificates allow different sets of privileges)
 - [ ] AppRole authentication against Vault is used for both Kafka brokers and consumers / producers. 
@@ -123,7 +123,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Run a Kafka broker with the configured Vault tokens and IDs.
   ```
-  $ docker run -e VAULT_ADDR=http://vault:8200 -e VAULT_ROLE_ID=${VAULT_ROLE_ID} -e VAULT_ROLE_SECRET_ID=${VAULT_ROLE_SECRET_ID} --network kafka --hostname kafka1.broker.kafka.local -d kafka_vault
+  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
   ```
 - Grant cluster admin rights to the broker.
   ```

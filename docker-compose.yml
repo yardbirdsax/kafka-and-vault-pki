@@ -35,5 +35,15 @@ services:
         source: $PWD
         target: /repo
       
-          
+  kafka1:
+    container_name: kafka1.broker.kafka.local
+    hostname: kafka1.broker.kafka.local
+    build:
+      context: ../kafka/
+    environment: 
+      VAULT_ADDR: http://vault:8200
+      VAULT_ROLE_ID: ${VAULT_ROLE_ID}
+      VAULT_ROLE_SECRET_ID: ${VAULT_ROLE_SECRET_ID}
+    networks:
+      - kafka
     
