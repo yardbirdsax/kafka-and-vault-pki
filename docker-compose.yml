@@ -39,11 +39,21 @@ services:
     container_name: kafka1.broker.kafka.local
     hostname: kafka1.broker.kafka.local
     build:
-      context: ../kafka/
+      context: ./kafka/
     environment: 
       VAULT_ADDR: http://vault:8200
       VAULT_ROLE_ID: ${VAULT_ROLE_ID}
       VAULT_ROLE_SECRET_ID: ${VAULT_ROLE_SECRET_ID}
     networks:
       - kafka
-    
+  producer1:
+    container_name: producer1
+    hostname: producer1.producer.kafka.local
+    build:
+      context: ./producer/
+    environment: 
+      VAULT_ADDR: http://vault:8200
+      VAULT_ROLE_ID: ${VAULT_PRODUCER_ROLE_ID}
+      VAULT_ROLE_SECRET_ID: ${VAULT_PRODUCER_ROLE_SECRET_ID}
+    networks:
+      - kafka
