@@ -11,7 +11,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
 ## Goals and Requirements
 
 - [X] The Kafka start-up process must include authenticating against Vault, retrieving certificates, and then starting the Kafka broker with those certificates bound.
-- [ ] Kafka consumers and producers must follow a similar pattern, where certificates are retrieved every time they start up.
+- [X] Kafka consumers and producers must follow a similar pattern, where certificates are retrieved every time they start up.
 - [ ] Different consumers and producers must be able to obtain certificates from Vault that only allow them access to resources they are authorized for (i.e. different certificates allow different sets of privileges)
 - [ ] AppRole authentication against Vault is used for both Kafka brokers and consumers / producers. 
 
