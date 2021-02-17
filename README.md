@@ -10,9 +10,10 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
 
 ## Goals and Requirements
 
-- The Kafka start-up process must include authenticating against Vault, retrieving certificates, and then starting the Kafka broker with those certificates bound.
-- Kafka consumers and producers must follow a similar pattern, where certificates are retrieved every time they start up.
-- AppRole authentication against Vault is used for both Kafka brokers and consumers / producers. 
+- [ ] The Kafka start-up process must include authenticating against Vault, retrieving certificates, and then starting the Kafka broker with those certificates bound.
+- [ ] Kafka consumers and producers must follow a similar pattern, where certificates are retrieved every time they start up.
+- [ ] Different consumers and producers must be able to obtain certificates from Vault that only allow them access to resources they are authorized for (i.e. different certificates allow different sets of privileges)
+- [ ] AppRole authentication against Vault is used for both Kafka brokers and consumers / producers. 
 
 ## Setup and Execution
 
@@ -107,12 +108,20 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Fetch a RoleID and SecretID for the AppRole.
   ```
-  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read auth/approle/role/kafka-broker/role-id
+  $ export VAULT_ROLE_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read auth/approle/role/kafka-broker/role-id`
   Key        Value
   ---        -----
   role_id    7b69c952-f05c-6d5a-a5b7-c5130163ca61
-  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault write -f auth/approle/role/kafka-broker/secret-id
+  $ export VAULT_ROLE_SECRET_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault write -field=secret_id -f auth/approle/role/kafka-broker/secret-id`
   Key                   Value
   ---                   -----
   secret_id             766db74c-6a86-7937-1b18-cd2a09ca29dd
   secret_id_accessor    973c078c-d552-ec72-6532-9625bfdf846f
+- Build the customized Docker image that includes the customized start-up script.
+  ```
+  $ docker build -t kafka_vault kafka
+  ```
+- Run a Kafka broker with the configured Vault tokens and IDs.
+  ```
+  $ docker run -e VAULT_ADDR=http://vault:8200 -e VAULT_ROLE_ID=${VAULT_ROLE_ID} -e VAULT_ROLE_SECRET_ID=${VAULT_ROLE_SECRET_ID} --network kafka --hostname kafka1.broker.kafka.local -d kafka_vault
+  ```
