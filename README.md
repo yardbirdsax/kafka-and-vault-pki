@@ -161,3 +161,31 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
   $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
   ```
+## Configure for Kafka Consumers
+
+- Create a role for issuing certificates.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-consumer-role.json http://localhost:8200/v1/pki/kafka/roles/kafka-consumer
+  ```
+- Create a policy for Kafka consumers.
+  ```
+  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault policy write kafka-consumer /repo/policies/kafka-consumer.hcl
+  Success! Uploaded policy: kafka-consumer
+  ```
+- Create an AppRole for Kafka consumers.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-kafka-consumer-approle.json http://localhost:8200/v1/auth/approle/role/kafka-consumer -v
+  ```
+- Fetch a RoleID and SecretID for the AppRole.
+  ```
+  $ export VAULT_CONSUMER_ROLE_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read -field=role_id auth/approle/role/kafka-consumer/role-id`
+  $ export VAULT_CONSUMER_ROLE_SECRET_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault write -field=secret_id -f auth/approle/role/kafka-consumer/secret-id`
+- Grant producing rights to the consumer.
+  ```
+  $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=consumer1.consumer.kafka.local' --topic producer-topic --operation Read --operation Describe
+  $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=consumer1.consumer.kafka.local' --group consumer-group --operation Read
+  ```
+- Run a Kafka producer with the configured Vault tokens and IDs.
+  ```
+  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
+  ```

@@ -57,3 +57,14 @@ services:
       VAULT_ROLE_SECRET_ID: ${VAULT_PRODUCER_ROLE_SECRET_ID}
     networks:
       - kafka
+  consumer1:
+    container_name: consumer1
+    hostname: consumer1.consumer.kafka.local
+    build:
+      context: ./consumer/
+    environment: 
+      VAULT_ADDR: http://vault:8200
+      VAULT_ROLE_ID: ${VAULT_CONSUMER_ROLE_ID}
+      VAULT_ROLE_SECRET_ID: ${VAULT_CONSUMER_ROLE_SECRET_ID}
+    networks:
+      - kafka
