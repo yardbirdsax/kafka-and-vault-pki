@@ -125,3 +125,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
   $ docker run -e VAULT_ADDR=http://vault:8200 -e VAULT_ROLE_ID=${VAULT_ROLE_ID} -e VAULT_ROLE_SECRET_ID=${VAULT_ROLE_SECRET_ID} --network kafka --hostname kafka1.broker.kafka.local -d kafka_vault
   ```
+- Grant cluster admin rights to the broker.
+  ```
+  $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=kafka1.broker.kafka.local' --cluster
+  ```
