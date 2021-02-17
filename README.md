@@ -108,7 +108,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Fetch a RoleID and SecretID for the AppRole.
   ```
-  $ export VAULT_ROLE_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read auth/approle/role/kafka-broker/role-id`
+  $ export VAULT_ROLE_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read -field=role_id auth/approle/role/kafka-broker/role-id`
   Key        Value
   ---        -----
   role_id    7b69c952-f05c-6d5a-a5b7-c5130163ca61
@@ -128,4 +128,36 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
 - Grant cluster admin rights to the broker.
   ```
   $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=kafka1.broker.kafka.local' --cluster
+  ```
+
+## Configure for Kafka Producers
+
+- Create a role for issuing certificates.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-producer-role.json http://localhost:8200/v1/pki/kafka/roles/kafka-producer
+  ```
+- Create a policy for Kafka servers.
+  ```
+  $ docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault policy write kafka-producer /repo/policies/kafka-producer.hcl
+  Success! Uploaded policy: kafka-producer
+  ```
+- Create an AppRole for Kafka servers.
+  ```
+  curl -H"X-Vault-Token:${VAULT_TOKEN}" -XPOST -d@json/create-kafka-producer-approle.json http://localhost:8200/v1/auth/approle/role/kafka-producer -v
+  ```
+- Fetch a RoleID and SecretID for the AppRole.
+  ```
+  $ export VAULT_PRODUCER_ROLE_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault read -field=role_id auth/approle/role/kafka-producer/role-id`
+  $ export VAULT_PRODUCER_ROLE_SECRET_ID=`docker exec -e VAULT_TOKEN=${VAULT_TOKEN} vault vault write -field=secret_id -f auth/approle/role/kafka-producer/secret-id`
+- Grant producing rights to the producer.
+  ```
+  $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=producer1.producer.kafka.local' --topic producer-topic --operation Write --operation Describe
+  ```
+- Create the new topic.
+  ```
+  $ docker exec kafka1.broker.kafka.local /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka1.broker.kafka.local:9093 --if-not-exists --topic producer-topic --create --replication-factor 1 --partitions 1 --command-config /opt/kafka/config/adminconfig.properties
+  ```
+- Run a Kafka producer with the configured Vault tokens and IDs.
+  ```
+  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
   ```
