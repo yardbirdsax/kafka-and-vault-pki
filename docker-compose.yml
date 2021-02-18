@@ -2,6 +2,11 @@ networks:
   kafka:
     name: kafka
 services:
+  zookeeper:
+    image: zookeeper:3.6.2
+    container_name: zookeeper
+    networks:
+      - kafka
   vault:
     image: vault:1.6.2
     container_name: vault

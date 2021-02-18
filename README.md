@@ -121,13 +121,17 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
   $ docker build -t kafka_vault kafka
   ```
-- Run a Kafka broker with the configured Vault tokens and IDs.
+- Start the Zookeeper container
   ```
-  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
+  $ docker-compose up -d zookeeper
   ```
 - Grant cluster admin rights to the broker.
   ```
   $ docker run -it --rm --entrypoint bash --network kafka kafka_vault /opt/kafka/bin/kafka-acls.sh --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal 'User:CN=kafka1.broker.kafka.local' --cluster
+  ```
+- Run a Kafka broker with the configured Vault tokens and IDs.
+  ```
+  $ docker-compose up --build -d kafka1
   ```
 
 ## Configure for Kafka Producers
@@ -159,7 +163,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Run a Kafka producer with the configured Vault tokens and IDs.
   ```
-  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
+  $ docker-compose -f up --build -d producer1
   ```
 ## Configure for Kafka Consumers
 
@@ -187,5 +191,5 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
   ```
 - Run a Kafka producer with the configured Vault tokens and IDs.
   ```
-  $ docker-compose -f vault/docker-compose.yml up --build -d kafka1
+  $ docker-compose up --build -d consumer1
   ```
