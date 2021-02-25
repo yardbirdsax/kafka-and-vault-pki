@@ -21,7 +21,7 @@ This repository contains a reference implementation for utilizing Hashicorp Vaul
 
 - Start up the Vault container by running the following command:
   ```
-  docker-compose -f vault/docker-compose.yml up -d vault
+  docker-compose up -d vault
   ```
 - Initialize Vault and retrieve the token and unseal keys. **Keep these because if you lose them you'll have to start over.**
   ```
